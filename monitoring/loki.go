@@ -1,35 +1,16 @@
-package proxy
+package monitoring
 
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
 	"time"
+	"voltgate-proxy/proxy"
 )
 
-type LogEntryStream struct {
-	Stream map[string]string `json:"stream"`
-	Values [][]string        `json:"values"`
-}
-
-type LogEntry struct {
-	Streams []LogEntryStream `json:"streams"`
-}
-
-func (p *Server) MonitorRequest(request *http.Request, originalUrl *url.URL, code int, size int, duration time.Duration) {
-	logMsg := fmt.Sprintf("[%s] -> [%s] -> %s %s (%d / %d bytes / %dms)",
-		request.RemoteAddr, originalUrl.Host, request.Method, request.URL, code, size, duration.Milliseconds())
-
-	log.Printf(logMsg)
-
-	go p.sendToLoki(logMsg)
-}
-
-func (p *Server) sendToLoki(logMsg string) {
+func sendToLoki(p *proxy.Server, logMsg string) {
 	p.Mu.RLock()
 	lokiUrl := p.LokiUrl
 	p.Mu.RUnlock()

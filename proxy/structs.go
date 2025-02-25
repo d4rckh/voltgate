@@ -9,7 +9,7 @@ import (
 type Server struct {
 	Mu        sync.RWMutex
 	Routes    map[string]*url.URL
-	transport *http.Transport
+	Transport *http.Transport
 	Md5       string
 	LokiUrl   string
 }

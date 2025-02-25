@@ -8,7 +8,7 @@ import (
 func NewProxyServer() *Server {
 	proxy := &Server{
 		Routes:    make(map[string]*url.URL),
-		transport: &http.Transport{},
+		Transport: &http.Transport{},
 	}
 
 	return proxy

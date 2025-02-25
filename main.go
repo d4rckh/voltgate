@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"voltgate-proxy/config"
+	"voltgate-proxy/handler"
 	"voltgate-proxy/proxy"
 )
 
@@ -19,7 +20,9 @@ func main() {
 		go config.ReloadConfig(proxyServer, initialConfig.ReloadConfigInterval, "config.yaml")
 	}
 
-	http.HandleFunc("/", proxyServer.HandleRequest)
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		handler.HandleRequest(proxyServer, writer, request)
+	})
 	log.Println("Proxy server started on", initialConfig.Address)
 	log.Fatal(http.ListenAndServe(initialConfig.Address, nil))
 }
