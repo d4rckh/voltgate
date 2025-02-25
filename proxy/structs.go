@@ -7,7 +7,8 @@ import (
 )
 
 type Server struct {
-	mu        sync.RWMutex
-	routes    map[string]*url.URL
+	Mu        sync.RWMutex
+	Routes    map[string]*url.URL
 	transport *http.Transport
+	Md5       string
 }

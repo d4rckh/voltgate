@@ -11,7 +11,8 @@ type Service struct {
 }
 
 type AppConfig struct {
-	Services  []Service  `yaml:"services"`
-	Endpoints []Endpoint `yaml:"endpoints"`
-	Address   string     `yaml:"address"`
+	Services             []Service  `yaml:"services"`
+	Endpoints            []Endpoint `yaml:"endpoints"`
+	Address              string     `yaml:"proxy.address"`
+	ReloadConfigInterval int        `yaml:"proxy.config.reload_interval"`
 }

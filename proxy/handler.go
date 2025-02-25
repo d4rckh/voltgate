@@ -6,10 +6,10 @@ import (
 )
 
 func (p *Server) HandleRequest(w http.ResponseWriter, r *http.Request) {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
+	p.Mu.RLock()
+	defer p.Mu.RUnlock()
 
-	targetURL, exists := p.routes[r.Host]
+	targetURL, exists := p.Routes[r.Host]
 	if !exists {
 		http.Error(w, "Service not found", http.StatusNotFound)
 		return
