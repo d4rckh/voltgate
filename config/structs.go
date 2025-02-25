@@ -13,4 +13,5 @@ type Service struct {
 type AppConfig struct {
 	Services  []Service  `yaml:"services"`
 	Endpoints []Endpoint `yaml:"endpoints"`
+	Address   string     `yaml:"address"`
 }
