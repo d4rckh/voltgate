@@ -23,7 +23,7 @@ func MonitorRequest(p *proxy.Server, request *http.Request, originalUrl *url.URL
 	logMsg := fmt.Sprintf("[%s] -> [%s] -> %s %s (%d / %d bytes / %dms)",
 		request.RemoteAddr, originalUrl.Host, request.Method, request.URL, code, size, duration.Milliseconds())
 
-	log.Printf(logMsg)
+	log.Printf("%s", logMsg)
 
 	RequestCount.WithLabelValues(request.Method, originalUrl.Host, "", request.URL.Path, strconv.Itoa(code)).Inc()
 	RequestDuration.WithLabelValues(request.Method, originalUrl.Host, "", request.URL.Path).Observe(float64(duration.Milliseconds()))

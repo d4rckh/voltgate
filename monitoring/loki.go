@@ -30,13 +30,13 @@ func sendToLoki(p *proxy.Server, logMsg string) {
 
 	jsonData, err := json.Marshal(logEntry)
 	if err != nil {
-		log.Printf(err.Error())
+		log.Printf("%s", err.Error())
 		return
 	}
 
 	req, err := http.NewRequest("POST", lokiUrl, bytes.NewBuffer(jsonData))
 	if err != nil {
-		log.Printf(err.Error())
+		log.Printf("%s", err.Error())
 		return
 	}
 
@@ -46,7 +46,7 @@ func sendToLoki(p *proxy.Server, logMsg string) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		log.Printf(err.Error())
+		log.Printf("%s", err.Error())
 		return
 	}
 	defer resp.Body.Close()
