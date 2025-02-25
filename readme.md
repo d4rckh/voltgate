@@ -5,6 +5,18 @@
 - Hot reloading of endpoints and services
 - Log publishing to Loki
 
+### Docker-compose example
+```yaml
+services:
+  proxy:
+    image: d4rckh/voltgate-proxy:latest
+    ports:
+      - "80:80" # proxy port
+      - "9999:9999" # management port
+    volumes:
+      - ./voltgate.yaml:/app/config.yaml
+```
+
 ### Configuration Example (config.yaml)
 ```yaml
 management:
