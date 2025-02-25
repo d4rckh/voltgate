@@ -11,4 +11,5 @@ type Server struct {
 	Routes    map[string]*url.URL
 	transport *http.Transport
 	Md5       string
+	LokiUrl   string
 }

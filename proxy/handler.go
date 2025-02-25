@@ -3,6 +3,7 @@ package proxy
 import (
 	"net/http"
 	"net/http/httputil"
+	"time"
 )
 
 func (p *Server) HandleRequest(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +26,11 @@ func (p *Server) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	r.URL.Scheme = targetURL.Scheme
 	r.Host = targetURL.Host
 
-	proxy.ServeHTTP(w, r)
+	rwTrap := ResponseWriterTrap{ResponseWriter: w}
 
-	p.LogRequest(r, &originalURL)
+	starTime := time.Now()
+	proxy.ServeHTTP(&rwTrap, r)
+	duration := time.Since(starTime)
+
+	p.MonitorRequest(r, &originalURL, rwTrap.StatusCode, rwTrap.ContentSize, duration)
 }

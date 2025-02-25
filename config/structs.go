@@ -14,5 +14,6 @@ type AppConfig struct {
 	Services             []Service  `yaml:"services"`
 	Endpoints            []Endpoint `yaml:"endpoints"`
 	Address              string     `yaml:"proxy.address"`
-	ReloadConfigInterval int        `yaml:"proxy.config.reload_interval"`
+	ReloadConfigInterval int        `yaml:"config.reload_interval"`
+	LokiUrl              string     `yaml:"monitoring.logging.loki"`
 }

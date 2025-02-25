@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/json"
 	"gopkg.in/yaml.v3"
@@ -22,12 +23,16 @@ func ReadConfig(filename string) (*AppConfig, string, error) {
 
 	endpointsJson, endpointsJsonErr := json.Marshal(appConfig.Endpoints)
 	servicesJson, servicesJsonErr := json.Marshal(appConfig.Services)
+	monitoringJson, monitoringJsonErr := json.Marshal(appConfig.LokiUrl)
 
-	if servicesJsonErr != nil || endpointsJsonErr != nil {
+	if servicesJsonErr != nil || endpointsJsonErr != nil || monitoringJsonErr != nil {
 		return nil, "", err
 	}
 
-	sum := md5.Sum(append(endpointsJson, servicesJson...))
+	sum := md5.Sum(bytes.Join(
+		[][]byte{endpointsJson, servicesJson, monitoringJson},
+		[]byte{},
+	))
 
 	return &appConfig, string(sum[:]), nil
 }

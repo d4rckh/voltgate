@@ -27,6 +27,11 @@ func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
 
 	log.Println("Successfully loaded", len(config.Endpoints), "endpoints and", len(config.Services), "services")
 
+	if config.LokiUrl != "" {
+		log.Println("Publishing http logs to Loki via", config.LokiUrl)
+		proxy.LokiUrl = config.LokiUrl
+	}
+
 	proxy.Md5 = md5
 }
 
