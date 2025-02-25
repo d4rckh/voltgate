@@ -40,12 +40,12 @@ monitoring:
     # Default: false
 
 services:
-  - name: prometheus
+  - name: myservice
     url: http://localhost:9090
 
 endpoints:
-  - host: prometheus.host.com
-    service: prometheus
+  - host: host.com
+    service: myservice
 ```
 
 ## Metrics Overview
