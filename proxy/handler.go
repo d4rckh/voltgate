@@ -1,0 +1,31 @@
+package proxy
+
+import (
+	"net/http"
+	"net/http/httputil"
+)
+
+func (p *Server) HandleRequest(w http.ResponseWriter, r *http.Request) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
+	targetURL, exists := p.routes[r.Host]
+	if !exists {
+		http.Error(w, "Service not found", http.StatusNotFound)
+		return
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	proxy.Transport = p.transport
+
+	originalURL := *r.URL
+	originalURL.Host = r.Host
+
+	r.URL.Host = targetURL.Host
+	r.URL.Scheme = targetURL.Scheme
+	r.Host = targetURL.Host
+
+	proxy.ServeHTTP(w, r)
+
+	p.LogRequest(r, &originalURL)
+}

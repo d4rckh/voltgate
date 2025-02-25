@@ -1,0 +1,7 @@
+services:
+  - name: prometheus
+    url: http://localhost:9090
+
+endpoints:
+  - host: resedinta.dfourmusic.com
+    service: prometheus
