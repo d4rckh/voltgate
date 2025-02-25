@@ -7,21 +7,25 @@
 
 ### Configuration Example (config.yaml)
 ```yaml
-management.address: ":80"
-  # Default: ":9999"
-proxy.address: ":80"
-  # Default: ":80"
+management:
+  address: ":9999"
+    # Default: ":9999"
+proxy:
+  address: ":80"
+    # Default: ":80"
 
-config.reload_interval: 10
-  # Reloads monitoring, services, and endpoints every 10 seconds
-  # Default: do not reload
+config:
+  reload_interval: 10
+    # Reloads monitoring, services, and endpoints every 10 seconds
+    # Default: do not reload
 
-monitoring.logging.loki: http://localhost:3100/loki/api/v1/push
-  # Publishes logs to Loki
-  # Default: do not publish
-monitoring.metrics.prometheus: true
-  # Exposes /metrics on the management address
-  # Default: false
+monitoring:
+  loki: http://localhost:3100/loki/api/v1/push
+    # Publishes logs to Loki
+    # Default: do not publish
+  prometheus: true
+    # Exposes /metrics on the management address
+    # Default: false
 
 services:
   - name: prometheus

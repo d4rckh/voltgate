@@ -23,7 +23,7 @@ func ReadConfig(filename string) (*AppConfig, string, error) {
 
 	endpointsJson, endpointsJsonErr := json.Marshal(appConfig.Endpoints)
 	servicesJson, servicesJsonErr := json.Marshal(appConfig.Services)
-	monitoringJson, monitoringJsonErr := json.Marshal(appConfig.LokiUrl)
+	monitoringJson, monitoringJsonErr := json.Marshal(appConfig.MonitoringAppConfig.LokiUrl)
 
 	if servicesJsonErr != nil || endpointsJsonErr != nil || monitoringJsonErr != nil {
 		return nil, "", err

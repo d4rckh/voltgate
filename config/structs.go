@@ -10,12 +10,17 @@ type Service struct {
 	Name string `yaml:"name"`
 }
 
+type MonitoringAppConfig struct {
+	LokiUrl           string `yaml:"loki"`
+	PrometheusEnabled bool   `yaml:"prometheus"`
+}
+
 type AppConfig struct {
 	Services             []Service  `yaml:"services"`
 	Endpoints            []Endpoint `yaml:"endpoints"`
 	Address              string     `yaml:"proxy.address"`
 	ManagementAddress    string     `yaml:"management.address"`
 	ReloadConfigInterval int        `yaml:"config.reload_interval"`
-	LokiUrl              string     `yaml:"monitoring.logging.loki"`
-	PrometheusEnabled    bool       `yaml:"monitoring.metrics.prometheus"`
+
+	MonitoringAppConfig MonitoringAppConfig `yaml:"monitoring"`
 }

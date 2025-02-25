@@ -26,7 +26,10 @@ func main() {
 
 	go func() {
 		log.Printf("Starting management server on %s", initialConfig.ManagementAddress)
-		http.Handle("/metrics", promhttp.Handler())
+		if initialConfig.MonitoringAppConfig.PrometheusEnabled {
+			log.Printf("Serving Prometheus metrics on %s/metrics", initialConfig.ManagementAddress)
+			http.Handle("/metrics", promhttp.Handler())
+		}
 		log.Fatal(http.ListenAndServe(initialConfig.ManagementAddress, nil))
 	}()
 
