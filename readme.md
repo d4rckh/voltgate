@@ -41,12 +41,12 @@ monitoring:
     # Default: false
 
 services:
-  - name: prometheus
+  - name: service_name
     url: http://localhost:9090
 
 endpoints:
-  - host: prometheus.host.com
-    service: prometheus
+  - host: domain.com
+    service: service_name
     rate_limit:
       rules:
         - path: "^/api/some_action"
