@@ -2,7 +2,7 @@
 
 ## Features
 - Reverse proxy supporting multiple services and domains
-- Basic rate limiting
+- Basic rate limiting based on client address
 - Hot reloading of endpoints and services
 - Log publishing to Loki
 
