@@ -6,6 +6,7 @@ import (
 	"time"
 	"voltgate-proxy/monitoring"
 	"voltgate-proxy/proxy"
+	"voltgate-proxy/rate_limiting"
 )
 
 func HandleRequest(p *proxy.Server, w http.ResponseWriter, r *http.Request) {
@@ -15,6 +16,13 @@ func HandleRequest(p *proxy.Server, w http.ResponseWriter, r *http.Request) {
 	targetURL, exists := p.Routes[r.Host]
 	if !exists {
 		http.Error(w, "Service not found", http.StatusNotFound)
+		return
+	}
+
+	rateLimitingRules := p.EndpointRateLimitRules[r.Host]
+
+	if !rate_limiting.PerformLimiting(p.RateLimiterStorage, rateLimitingRules, r) {
+		http.Error(w, "Too many requests", http.StatusTooManyRequests)
 		return
 	}
 
@@ -33,9 +41,9 @@ func HandleRequest(p *proxy.Server, w http.ResponseWriter, r *http.Request) {
 
 	rwTrap := proxy.ResponseWriterTrap{ResponseWriter: w}
 
-	starTime := time.Now()
+	startTime := time.Now()
 	reverseProxy.ServeHTTP(&rwTrap, r)
-	duration := time.Since(starTime)
+	duration := time.Since(startTime)
 
 	monitoring.MonitorRequest(p, r, &originalURL, rwTrap.StatusCode, rwTrap.ContentSize, duration)
 }

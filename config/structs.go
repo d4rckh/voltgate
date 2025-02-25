@@ -1,13 +1,21 @@
 package config
 
+import "voltgate-proxy/rate_limiting"
+
+type RateLimitConfig struct {
+	Rules []rate_limiting.RateLimitRule `yaml:"rules"`
+}
+
 type Endpoint struct {
-	Host    string `yaml:"host"`
-	Service string `yaml:"service"`
+	Host            string          `yaml:"host"`
+	Service         string          `yaml:"service"`
+	RateLimitConfig RateLimitConfig `yaml:"rate_limit"`
 }
 
 type Service struct {
-	Url  string `yaml:"url"`
-	Name string `yaml:"name"`
+	Url             string          `yaml:"url"`
+	Name            string          `yaml:"name"`
+	RateLimitConfig RateLimitConfig `yaml:"rate_limit"`
 }
 
 type MonitoringAppConfig struct {

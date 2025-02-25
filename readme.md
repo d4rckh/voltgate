@@ -2,6 +2,7 @@
 
 ## Features
 - Reverse proxy supporting multiple services and domains
+- Basic rate limiting
 - Hot reloading of endpoints and services
 - Log publishing to Loki
 
@@ -46,6 +47,12 @@ services:
 endpoints:
   - host: prometheus.host.com
     service: prometheus
+    rate_limit:
+      rules:
+        - path: "^/api/some_action"
+          method: POST
+          window: 10
+          requests: 2
 ```
 
 ## Metrics Overview

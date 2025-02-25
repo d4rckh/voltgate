@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"time"
 	"voltgate-proxy/proxy"
+	"voltgate-proxy/rate_limiting"
 )
 
 func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
@@ -12,6 +13,14 @@ func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
 	defer proxy.Mu.Unlock()
 
 	proxy.Routes = make(map[string]*url.URL)
+
+	if proxy.EndpointRateLimitRules == nil {
+		proxy.EndpointRateLimitRules = make(map[string][]rate_limiting.RateLimitRule)
+	}
+
+	if proxy.ServicesRateLimitRules == nil {
+		proxy.ServicesRateLimitRules = make(map[string][]rate_limiting.RateLimitRule)
+	}
 
 	for _, service := range config.Services {
 		for _, endpoint := range config.Endpoints {
@@ -23,6 +32,13 @@ func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
 				}
 			}
 		}
+		proxy.ServicesRateLimitRules[service.Name] = make([]rate_limiting.RateLimitRule, len(service.RateLimitConfig.Rules))
+		copy(proxy.ServicesRateLimitRules[service.Name], service.RateLimitConfig.Rules)
+	}
+
+	for _, endpoint := range config.Endpoints {
+		proxy.EndpointRateLimitRules[endpoint.Host] = make([]rate_limiting.RateLimitRule, len(endpoint.RateLimitConfig.Rules))
+		copy(proxy.EndpointRateLimitRules[endpoint.Host], endpoint.RateLimitConfig.Rules)
 	}
 
 	log.Println("Successfully loaded", len(config.Endpoints), "endpoints and", len(config.Services), "services")

@@ -8,6 +8,7 @@ import (
 	"voltgate-proxy/handler"
 	"voltgate-proxy/monitoring"
 	"voltgate-proxy/proxy"
+	"voltgate-proxy/rate_limiting"
 )
 
 func main() {
@@ -16,6 +17,8 @@ func main() {
 	monitoring.InitMetrics()
 
 	proxyServer := proxy.NewProxyServer()
+
+	proxyServer.RateLimiterStorage = rate_limiting.MakeInMemoryRateLimiterStorage()
 
 	initialConfig := config.LoadConfig(proxyServer, "config.yaml")
 
