@@ -9,7 +9,7 @@
 ```yaml
 services:
   proxy:
-    image: d4rckh/voltgate-proxy:latest
+    image: d4rckh/voltgate:latest
     ports:
       - "80:80" # proxy port
       - "9999:9999" # management port
