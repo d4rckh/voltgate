@@ -19,9 +19,15 @@ type LogEntry struct {
 	Streams []LogEntryStream `json:"streams"`
 }
 
-func MonitorRequest(p *proxy.Server, request *http.Request, originalUrl *url.URL, code int, size int, duration time.Duration) {
-	logMsg := fmt.Sprintf("[%s] -> [%s] -> %s %s (%d / %d bytes / %dms)",
-		request.RemoteAddr, originalUrl.Host, request.Method, request.URL, code, size, duration.Milliseconds())
+func MonitorRequest(p *proxy.Server, request *http.Request, originalUrl *url.URL, code int, size int, duration time.Duration, cached bool) {
+	cachedMsg := ""
+
+	if cached {
+		cachedMsg = " [cached]"
+	}
+
+	logMsg := fmt.Sprintf("[%s] -> [%s] -> %s %s (%d / %d bytes / %dms)%s",
+		request.RemoteAddr, originalUrl.Host, request.Method, request.URL, code, size, duration.Milliseconds(), cachedMsg)
 
 	log.Printf("%s", logMsg)
 

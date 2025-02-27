@@ -48,8 +48,10 @@ type RateLimitRule struct {
 }
 
 type CacheRule struct {
-	Path string `yaml:"path"`
-	Ttl  int    `yaml:"ttl"`
+	Path    string   `yaml:"path"`
+	Ttl     int      `yaml:"ttl"`
+	Params  []string `yaml:"params"`
+	Methods []string `yaml:"methods"`
 }
 
 type RateLimitAppConfig struct {
@@ -68,6 +70,10 @@ type AppManagementConfig struct {
 	Address string `yaml:"address"`
 }
 
+type CacheAppConfig struct {
+	Storage string `yaml:"storage"`
+}
+
 type AppConfig struct {
 	Services             []Service  `yaml:"services"`
 	Endpoints            []Endpoint `yaml:"endpoints"`
@@ -80,4 +86,5 @@ type AppConfig struct {
 
 	MonitoringAppConfig MonitoringAppConfig `yaml:"monitoring"`
 	RateLimitAppConfig  RateLimitAppConfig  `yaml:"rate_limit"`
+	CacheAppConfig      CacheAppConfig      `yaml:"cache"`
 }

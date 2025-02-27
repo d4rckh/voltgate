@@ -16,10 +16,6 @@ func ForwardToHost(p *proxy.Server, w *proxy.ResponseWriterTrap, targetURL *url.
 	reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
 	reverseProxy.Transport = p.Transport
 
-	r.URL.Host = targetURL.Host
-	r.URL.Scheme = targetURL.Scheme
-	r.Host = targetURL.Host
-
 	reverseProxy.ServeHTTP(w, r)
 }
 
@@ -46,16 +42,19 @@ func HandleRequest(p *proxy.Server, rateLimitRules *config.AppRateLimitRules, ca
 
 	r.Header.Set("X-Forwarded-Host", originalURL.Host)
 	r.Header.Set("X-Forwarded-For", r.RemoteAddr)
+	r.URL.Host = targetURL.Host
+	r.URL.Scheme = targetURL.Scheme
+	r.Host = targetURL.Host
 
 	rwTrap := proxy.ResponseWriterTrap{ResponseWriter: w}
 
 	startTime := time.Now()
 
-	caching.PerformCaching(p, cRules, r, &rwTrap, func(rw *proxy.ResponseWriterTrap) {
+	cached := caching.PerformCaching(p, cRules, r, &rwTrap, func(rw *proxy.ResponseWriterTrap) {
 		ForwardToHost(p, rw, targetURL, r)
 	})
 
 	duration := time.Since(startTime)
 
-	monitoring.MonitorRequest(p, r, &originalURL, rwTrap.StatusCode, rwTrap.ContentSize, duration)
+	monitoring.MonitorRequest(p, r, &originalURL, rwTrap.StatusCode, rwTrap.ContentSize, duration, cached)
 }

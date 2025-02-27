@@ -17,20 +17,20 @@ type RedisCacherStorage struct {
 	ctx    context.Context
 }
 
-func (r *RedisCacherStorage) GetRequest(method string, path string) (int, http.Header, []byte, bool) {
-	body, err := r.client.Get(r.ctx, strings.Join([]string{method, path, "body"}, "")).Bytes()
+func (r *RedisCacherStorage) GetRequest(method string, cacheKey string) (int, http.Header, []byte, bool) {
+	body, err := r.client.Get(r.ctx, strings.Join([]string{method, cacheKey, "body"}, "")).Bytes()
 
 	if err != nil {
 		return 0, make(http.Header), nil, false
 	}
 
-	status, err := r.client.Get(r.ctx, strings.Join([]string{method, path, "status"}, "")).Int()
+	status, err := r.client.Get(r.ctx, strings.Join([]string{method, cacheKey, "status"}, "")).Int()
 
 	if err != nil {
 		return 0, nil, nil, false
 	}
 
-	marshaledHeader, err := r.client.Get(r.ctx, strings.Join([]string{method, path, "header"}, "")).Bytes()
+	marshaledHeader, err := r.client.Get(r.ctx, strings.Join([]string{method, cacheKey, "header"}, "")).Bytes()
 	header := make(http.Header)
 
 	err = json.Unmarshal(marshaledHeader, &header)
@@ -41,9 +41,9 @@ func (r *RedisCacherStorage) GetRequest(method string, path string) (int, http.H
 	return status, header, body, true
 }
 
-func (r *RedisCacherStorage) CacheRequest(method string, path string, status int, header http.Header, data []byte, ttl time.Duration) {
-	r.client.Set(r.ctx, strings.Join([]string{method, path, "body"}, ""), data, ttl)
-	r.client.Set(r.ctx, strings.Join([]string{method, path, "status"}, ""), status, ttl)
+func (r *RedisCacherStorage) CacheRequest(method string, cacheKey string, status int, header http.Header, data []byte, ttl time.Duration) {
+	r.client.Set(r.ctx, strings.Join([]string{method, cacheKey, "body"}, ""), data, ttl)
+	r.client.Set(r.ctx, strings.Join([]string{method, cacheKey, "status"}, ""), status, ttl)
 
 	marshaledHeader, err := json.Marshal(header)
 
@@ -52,7 +52,7 @@ func (r *RedisCacherStorage) CacheRequest(method string, path string, status int
 		return
 	}
 
-	r.client.Set(r.ctx, strings.Join([]string{method, path, "header"}, ""), marshaledHeader, ttl)
+	r.client.Set(r.ctx, strings.Join([]string{method, cacheKey, "header"}, ""), marshaledHeader, ttl)
 }
 
 // MakeRedisCacherStorage creates an instance of RedisCacherStorage.

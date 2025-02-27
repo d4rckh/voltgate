@@ -1,37 +1,66 @@
 package caching
 
 import (
-	"log"
 	"net/http"
+	"net/url"
 	"regexp"
+	"slices"
 	"time"
 	"voltgate-proxy/config"
 	"voltgate-proxy/proxy"
 )
 
-func PerformCaching(p *proxy.Server, cacheRules []config.CacheRule, r *http.Request, rwTrap *proxy.ResponseWriterTrap, doRequest func(rwTrap *proxy.ResponseWriterTrap)) {
-	servedRequest := false
+func MakeCacheKey(r *http.Request, cacheRule config.CacheRule) string {
+	cacheKey := r.URL.Host + r.URL.Path
+	query := r.URL.Query()
+
+	if cacheRule.Params == nil {
+		// params not defined in config: add all query parameters
+		if len(query) > 0 {
+			cacheKey += "?" + query.Encode()
+		}
+	} else if len(cacheRule.Params) > 0 {
+		// params defined but not empty: filter based on allowed parameters
+		filteredQuery := url.Values{}
+		for _, param := range cacheRule.Params {
+			if values, exists := query[param]; exists {
+				filteredQuery[param] = values
+			}
+		}
+		if len(filteredQuery) > 0 {
+			cacheKey += "?" + filteredQuery.Encode()
+		}
+	}
+	return cacheKey
+}
+
+func PerformCaching(p *proxy.Server, cacheRules []config.CacheRule, r *http.Request, rwTrap *proxy.ResponseWriterTrap, doRequest func(rwTrap *proxy.ResponseWriterTrap)) bool {
+	if p.CacherStorage == nil {
+		doRequest(rwTrap)
+		return false
+	}
 
 	for _, cacheRule := range cacheRules {
 		matchedPath, _ := regexp.Match(cacheRule.Path, []byte(r.URL.Path))
 
-		if !matchedPath {
+		if !(matchedPath && (slices.Contains(cacheRule.Methods, r.Method) || len(cacheRule.Methods) == 0)) {
 			continue
 		}
 
-		status, header, body, exists := p.CacherStorage.GetRequest(r.Method, r.URL.Path)
+		cacheKey := MakeCacheKey(r, cacheRule)
+
+		status, header, body, exists := p.CacherStorage.GetRequest(r.Method, cacheKey)
 
 		if !exists {
-			log.Printf("doing request @ %s", r.URL.Path)
+			//log.Printf("doing request @ %s", r.URL.Path)
 
 			doRequest(rwTrap)
-			servedRequest = true
 
-			p.CacherStorage.CacheRequest(r.Method, r.URL.Path, rwTrap.StatusCode, rwTrap.Header(), rwTrap.Body, time.Duration(cacheRule.Ttl)*time.Second)
-			return
+			p.CacherStorage.CacheRequest(r.Method, cacheKey, rwTrap.StatusCode, rwTrap.Header(), rwTrap.Body, time.Duration(cacheRule.Ttl)*time.Second)
+			return false
 		}
 
-		log.Printf("serving cached request @ %s", r.URL.Path)
+		//log.Printf("serving cached request @ %s", cacheKey)
 
 		for key, values := range header {
 			for _, value := range values {
@@ -41,11 +70,10 @@ func PerformCaching(p *proxy.Server, cacheRules []config.CacheRule, r *http.Requ
 		rwTrap.WriteHeader(status)
 		rwTrap.Write(body)
 
-		servedRequest = true
+		return true
 	}
 
-	if !servedRequest {
-		doRequest(rwTrap)
-	}
+	doRequest(rwTrap)
 
+	return false
 }

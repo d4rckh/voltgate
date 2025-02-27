@@ -14,6 +14,10 @@ import (
 func PerformLimiting(p *proxy.Server, rules []config.RateLimitRule, request *http.Request) bool {
 	clientAddr, _, err := net.SplitHostPort(request.RemoteAddr)
 
+	if p.RateLimiterStorage == nil {
+		return true
+	}
+
 	if err != nil {
 		clientAddr = request.RemoteAddr
 	}

@@ -27,7 +27,22 @@ func main() {
 		proxyServer.RateLimiterStorage = ratelimiting.MakeInMemoryRateLimiterStorage()
 	}
 
-	proxyServer.CacherStorage = caching.MakeRedisCacherStorage(initialConfig.Storage.Redis)
+	switch initialConfig.CacheAppConfig.Storage {
+	case "redis":
+		proxyServer.CacherStorage = caching.MakeRedisCacherStorage(initialConfig.Storage.Redis)
+	case "memory":
+		proxyServer.CacherStorage = caching.MakeInMemoryCacherStorage()
+	}
+
+	if len(rateLimitRules.EndpointRateLimitRules) != 0 && proxyServer.RateLimiterStorage == nil {
+		log.Printf("ERROR: Found rate limiting rules but rate limiter storage not initialized, please define storage in config")
+		panic("")
+	}
+
+	if len(cacheRules.EndpointCacheRules) != 0 && proxyServer.CacherStorage == nil {
+		log.Printf("ERROR: Found cache rules but cacher storage not initialized, please define storage in config")
+		panic("")
+	}
 
 	if initialConfig.ReloadConfigInterval != 0 {
 		log.Println("Config reloading enabled, interval set to", initialConfig.ReloadConfigInterval, "seconds")
