@@ -41,6 +41,8 @@ func PerformCaching(p *proxy.Server, cacheRules []config.CacheRule, r *http.Requ
 	}
 
 	for _, cacheRule := range cacheRules {
+		cacheRule.Methods = []string{"GET"}
+
 		matchedPath, _ := regexp.Match(cacheRule.Path, []byte(r.URL.Path))
 
 		if !(matchedPath && (slices.Contains(cacheRule.Methods, r.Method) || len(cacheRule.Methods) == 0)) {

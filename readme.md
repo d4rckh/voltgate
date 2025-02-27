@@ -44,6 +44,11 @@ rate_limit:
     # Use Redis for rate limiting
     # Default: memory (Not recommended for production!)
 
+cache:
+  storage: redis
+    # Use Redis for caching
+    # Default: memory (Not recommended for production!)
+
 monitoring:
   loki: http://localhost:3100/loki/api/v1/push
     # Publishes logs to Loki
@@ -59,13 +64,18 @@ services:
 endpoints:
   - host: domain.com
     service: service_name
+    cache:
+      rules:
+        - path: "^/myendpoint"
+          ttl: 10 # seconds
+            # Optional caching rules, make sure to configure Redis for production 
     rate_limit:
       rules:
         - path: "^/api/some_action"
           method: POST
-          window: 10
+          window: 10 # seconds
           requests: 2
-            # Option rate limiting rules, make sure to confiure Redis for production
+            # Optional rate limiting rules, make sure to configure Redis for production
 ```
 
 ## Metrics Overview
