@@ -1,4 +1,4 @@
-# Voltgate Proxy
+# Voltgate
 
 ## Features
 - Reverse proxy supporting multiple services and domains
