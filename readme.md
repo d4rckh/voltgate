@@ -76,17 +76,33 @@ Counts the total number of HTTP requests received.
 
 - **Type:** Counter
 - **Labels:**
-    - `method`: HTTP method (e.g., GET, POST)
-    - `host`: Original requested host
-    - `target_service_name`: Proxied service name
-    - `path`: Request path
-    - `status`: HTTP response status code
+  - `method`: HTTP method (e.g., GET, POST)
+  - `host`: Original requested host
+  - `target_service_name`: Proxied service name
+  - `path`: Request path
+  - `status`: HTTP response status code
 
 #### Query Example:
 ```promql
 rate(http_requests_total{method="GET", status="200"}[5m])
 ```
 (Displays the rate of successful GET requests over 5 minutes.)
+
+### `http_blocked_requests_total` (Counter)
+Counts the total number of blocked HTTP requests.
+
+- **Type:** Counter
+- **Labels:**
+  - `method`: HTTP method (e.g., GET, POST)
+  - `host`: Original requested host
+  - `target_service_name`: Proxied service name
+  - `path`: Request path
+
+#### Query Example:
+```promql
+rate(http_blocked_requests_total[5m])
+```
+(Displays the rate of successful blocked requests over 5 minutes.)
 
 ---
 ### `http_request_duration_seconds` (Histogram)
