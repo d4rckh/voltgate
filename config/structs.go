@@ -8,15 +8,24 @@ type RateLimitConfig struct {
 	Rules []RateLimitRule `yaml:"rules"`
 }
 
+type CacheConfig struct {
+	Rules []CacheRule `yaml:"rules"`
+}
+
 type AppRateLimitRules struct {
 	EndpointRateLimitRules map[string][]RateLimitRule
 	ServicesRateLimitRules map[string][]RateLimitRule
+}
+
+type AppCacheRules struct {
+	EndpointCacheRules map[string][]CacheRule
 }
 
 type Endpoint struct {
 	Host            string          `yaml:"host"`
 	Service         string          `yaml:"service"`
 	RateLimitConfig RateLimitConfig `yaml:"rate_limit"`
+	CacheConfig     CacheConfig     `yaml:"cache"`
 }
 
 type Service struct {
@@ -38,6 +47,11 @@ type RateLimitRule struct {
 	Method           string `yaml:"method"`
 }
 
+type CacheRule struct {
+	Path string `yaml:"path"`
+	Ttl  int    `yaml:"ttl"`
+}
+
 type RateLimitAppConfig struct {
 	Storage string `yaml:"storage"`
 }
@@ -46,12 +60,21 @@ type StorageAppConfig struct {
 	Redis storage.RedisAppConfig `yaml:"redis"`
 }
 
+type AppProxyConfig struct {
+	Address string `yaml:"address"`
+}
+
+type AppManagementConfig struct {
+	Address string `yaml:"address"`
+}
+
 type AppConfig struct {
 	Services             []Service  `yaml:"services"`
 	Endpoints            []Endpoint `yaml:"endpoints"`
-	Address              string     `yaml:"proxy.address"`
-	ManagementAddress    string     `yaml:"management.address"`
 	ReloadConfigInterval int        `yaml:"config.reload_interval"`
+
+	ProxyConfig      AppProxyConfig      `yaml:"proxy"`
+	ManagementConfig AppManagementConfig `yaml:"management"`
 
 	Storage StorageAppConfig `yaml:"storage"`
 

@@ -32,12 +32,12 @@ func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
 		proxy.LokiUrl = config.MonitoringAppConfig.LokiUrl
 	}
 
-	if config.Address == "" {
-		config.Address = ":80"
+	if config.ProxyConfig.Address == "" {
+		config.ProxyConfig.Address = ":80"
 	}
 
-	if config.ManagementAddress == "" {
-		config.ManagementAddress = ":9999"
+	if config.ManagementConfig.Address == "" {
+		config.ManagementConfig.Address = ":9999"
 	}
 
 	proxy.Md5 = md5
@@ -56,7 +56,20 @@ func parseRateLimitRules(config *AppConfig) AppRateLimitRules {
 	return rateLimitRules
 }
 
-func LoadConfig(proxy *proxy.Server, filename string) (*AppConfig, AppRateLimitRules) {
+func parseCacheRules(config *AppConfig) AppCacheRules {
+	appCacheRules := AppCacheRules{
+		EndpointCacheRules: make(map[string][]CacheRule),
+	}
+
+	for _, endpoint := range config.Endpoints {
+		appCacheRules.EndpointCacheRules[endpoint.Host] = make([]CacheRule, len(endpoint.RateLimitConfig.Rules))
+		copy(appCacheRules.EndpointCacheRules[endpoint.Host], endpoint.CacheConfig.Rules)
+	}
+
+	return appCacheRules
+}
+
+func LoadConfig(proxy *proxy.Server, filename string) (*AppConfig, AppRateLimitRules, AppCacheRules) {
 	config, md5, err := ReadConfig(filename)
 
 	if err != nil {
@@ -65,7 +78,7 @@ func LoadConfig(proxy *proxy.Server, filename string) (*AppConfig, AppRateLimitR
 
 	BuildProxyFromConfig(proxy, config, md5)
 
-	return config, parseRateLimitRules(config)
+	return config, parseRateLimitRules(config), parseCacheRules(config)
 }
 
 func ReloadConfig(proxyServer *proxy.Server, secondsInterval int, filename string) {

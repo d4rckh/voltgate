@@ -14,4 +14,5 @@ type Server struct {
 	Md5                string
 	LokiUrl            string
 	RateLimiterStorage storage.RateLimiterStorage
+	CacherStorage      storage.CacherStorage
 }
