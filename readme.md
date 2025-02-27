@@ -32,6 +32,18 @@ config:
     # Reloads monitoring, services, and endpoints every 10 seconds
     # Default: do not reload
 
+storage:
+  redis:
+    address: localhost:6379
+    password: my-password
+    username: my-username
+      # Configure Redis for use in rate limiting
+
+rate_limit:
+  storage: redis
+    # Use Redis for rate limiting
+    # Default: memory (Not recommended for production!)
+
 monitoring:
   loki: http://localhost:3100/loki/api/v1/push
     # Publishes logs to Loki
@@ -53,6 +65,7 @@ endpoints:
           method: POST
           window: 10
           requests: 2
+            # Option rate limiting rules, make sure to confiure Redis for production
 ```
 
 ## Metrics Overview
