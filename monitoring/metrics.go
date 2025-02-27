@@ -41,5 +41,5 @@ var (
 )
 
 func InitMetrics() {
-	prometheus.MustRegister(RequestCount, RequestDuration, ResponseSize)
+	prometheus.MustRegister(RequestCount, RequestDuration, ResponseSize, BlockedRequestCount)
 }
