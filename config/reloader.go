@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"time"
 	"voltgate-proxy/proxy"
-	"voltgate-proxy/rate_limiting"
 )
 
 func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
@@ -13,14 +12,6 @@ func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
 	defer proxy.Mu.Unlock()
 
 	proxy.Routes = make(map[string]*url.URL)
-
-	if proxy.EndpointRateLimitRules == nil {
-		proxy.EndpointRateLimitRules = make(map[string][]rate_limiting.RateLimitRule)
-	}
-
-	if proxy.ServicesRateLimitRules == nil {
-		proxy.ServicesRateLimitRules = make(map[string][]rate_limiting.RateLimitRule)
-	}
 
 	for _, service := range config.Services {
 		for _, endpoint := range config.Endpoints {
@@ -32,13 +23,6 @@ func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
 				}
 			}
 		}
-		proxy.ServicesRateLimitRules[service.Name] = make([]rate_limiting.RateLimitRule, len(service.RateLimitConfig.Rules))
-		copy(proxy.ServicesRateLimitRules[service.Name], service.RateLimitConfig.Rules)
-	}
-
-	for _, endpoint := range config.Endpoints {
-		proxy.EndpointRateLimitRules[endpoint.Host] = make([]rate_limiting.RateLimitRule, len(endpoint.RateLimitConfig.Rules))
-		copy(proxy.EndpointRateLimitRules[endpoint.Host], endpoint.RateLimitConfig.Rules)
 	}
 
 	log.Println("Successfully loaded", len(config.Endpoints), "endpoints and", len(config.Services), "services")
@@ -59,7 +43,20 @@ func BuildProxyFromConfig(proxy *proxy.Server, config *AppConfig, md5 string) {
 	proxy.Md5 = md5
 }
 
-func LoadConfig(proxy *proxy.Server, filename string) *AppConfig {
+func parseRateLimitRules(config *AppConfig) AppRateLimitRules {
+	rateLimitRules := AppRateLimitRules{
+		EndpointRateLimitRules: make(map[string][]RateLimitRule),
+	}
+
+	for _, endpoint := range config.Endpoints {
+		rateLimitRules.EndpointRateLimitRules[endpoint.Host] = make([]RateLimitRule, len(endpoint.RateLimitConfig.Rules))
+		copy(rateLimitRules.EndpointRateLimitRules[endpoint.Host], endpoint.RateLimitConfig.Rules)
+	}
+
+	return rateLimitRules
+}
+
+func LoadConfig(proxy *proxy.Server, filename string) (*AppConfig, AppRateLimitRules) {
 	config, md5, err := ReadConfig(filename)
 
 	if err != nil {
@@ -68,7 +65,7 @@ func LoadConfig(proxy *proxy.Server, filename string) *AppConfig {
 
 	BuildProxyFromConfig(proxy, config, md5)
 
-	return config
+	return config, parseRateLimitRules(config)
 }
 
 func ReloadConfig(proxyServer *proxy.Server, secondsInterval int, filename string) {

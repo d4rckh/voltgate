@@ -1,43 +1,40 @@
 package main
 
 import (
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 	"voltgate-proxy/config"
 	"voltgate-proxy/handler"
+	"voltgate-proxy/management"
 	"voltgate-proxy/monitoring"
 	"voltgate-proxy/proxy"
-	"voltgate-proxy/rate_limiting"
+	"voltgate-proxy/ratelimiting"
 )
 
 func main() {
 	println("            .__   __                __          \n___  ______ |  |_/  |_  _________ _/  |_  ____  \n\\  \\/ /  _ \\|  |\\   __\\/ ___\\__  \\\\   __\\/ __ \\ \n \\   (  <_> )  |_|  | / /_/  > __ \\|  | \\  ___/ \n  \\_/ \\____/|____/__| \\___  (____  /__|  \\___  >\n                     /_____/     \\/          \\/ ")
 
+	proxyServer := proxy.NewProxyServer()
+	initialConfig, rateLimitRules := config.LoadConfig(proxyServer, "config.yaml")
+
 	monitoring.InitMetrics()
 
-	proxyServer := proxy.NewProxyServer()
-
-	proxyServer.RateLimiterStorage = rate_limiting.MakeInMemoryRateLimiterStorage()
-
-	initialConfig := config.LoadConfig(proxyServer, "config.yaml")
+	switch initialConfig.RateLimitAppConfig.Storage {
+	case "redis":
+		proxyServer.RateLimiterStorage = ratelimiting.MakeRedisRateLimiterStorage(initialConfig.Storage.Redis)
+	case "memory":
+		proxyServer.RateLimiterStorage = ratelimiting.MakeInMemoryRateLimiterStorage()
+	}
 
 	if initialConfig.ReloadConfigInterval != 0 {
 		log.Println("Config reloading enabled, interval set to", initialConfig.ReloadConfigInterval, "seconds")
 		go config.ReloadConfig(proxyServer, initialConfig.ReloadConfigInterval, "config.yaml")
 	}
 
-	go func() {
-		log.Printf("Starting management server on %s", initialConfig.ManagementAddress)
-		if initialConfig.MonitoringAppConfig.PrometheusEnabled {
-			log.Printf("Serving Prometheus metrics on %s/metrics", initialConfig.ManagementAddress)
-			http.Handle("/metrics", promhttp.Handler())
-		}
-		log.Fatal(http.ListenAndServe(initialConfig.ManagementAddress, nil))
-	}()
+	go management.StartManagementServer(initialConfig)
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		handler.HandleRequest(proxyServer, writer, request)
+		handler.HandleRequest(proxyServer, &rateLimitRules, writer, request)
 	})
 
 	log.Println("Proxy server started on", initialConfig.Address)

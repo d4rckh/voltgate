@@ -31,3 +31,14 @@ func MonitorRequest(p *proxy.Server, request *http.Request, originalUrl *url.URL
 
 	go sendToLoki(p, logMsg)
 }
+
+func MonitorBlockedRequest(p *proxy.Server, request *http.Request, count int, duration time.Duration) {
+	logMsg := fmt.Sprintf("Blocked %s (%d requests in %f seconds) (Request URL: %s)",
+		request.RemoteAddr, count, duration.Seconds(), request.URL)
+
+	log.Printf("%s", logMsg)
+
+	BlockedRequestCount.WithLabelValues(request.Method, request.Host, "", request.URL.Path).Inc()
+
+	go sendToLoki(p, logMsg)
+}

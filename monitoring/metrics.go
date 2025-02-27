@@ -13,6 +13,14 @@ var (
 		[]string{"method", "host", "target_service_name", "path", "status"},
 	)
 
+	BlockedRequestCount = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "http_blocked_requests_total",
+			Help: "Total number of blocked HTTP requests",
+		},
+		[]string{"method", "host", "target_service_name", "path"},
+	)
+
 	RequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "http_request_duration_seconds",

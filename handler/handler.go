@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"time"
+	"voltgate-proxy/config"
 	"voltgate-proxy/monitoring"
 	"voltgate-proxy/proxy"
-	"voltgate-proxy/rate_limiting"
+	"voltgate-proxy/ratelimiting"
 )
 
-func HandleRequest(p *proxy.Server, w http.ResponseWriter, r *http.Request) {
+func HandleRequest(p *proxy.Server, rules *config.AppRateLimitRules, w http.ResponseWriter, r *http.Request) {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 
@@ -19,9 +20,9 @@ func HandleRequest(p *proxy.Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rateLimitingRules := p.EndpointRateLimitRules[r.Host]
+	rateLimitingRules := rules.EndpointRateLimitRules[r.Host]
 
-	if !rate_limiting.PerformLimiting(p.RateLimiterStorage, rateLimitingRules, r) {
+	if !ratelimiting.PerformLimiting(p, rateLimitingRules, r) {
 		http.Error(w, "Too many requests", http.StatusTooManyRequests)
 		return
 	}

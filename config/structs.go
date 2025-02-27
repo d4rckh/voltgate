@@ -1,9 +1,16 @@
 package config
 
-import "voltgate-proxy/rate_limiting"
+import (
+	"voltgate-proxy/storage"
+)
 
 type RateLimitConfig struct {
-	Rules []rate_limiting.RateLimitRule `yaml:"rules"`
+	Rules []RateLimitRule `yaml:"rules"`
+}
+
+type AppRateLimitRules struct {
+	EndpointRateLimitRules map[string][]RateLimitRule
+	ServicesRateLimitRules map[string][]RateLimitRule
 }
 
 type Endpoint struct {
@@ -23,6 +30,22 @@ type MonitoringAppConfig struct {
 	PrometheusEnabled bool   `yaml:"prometheus"`
 }
 
+type RateLimitRule struct {
+	Path             string `yaml:"path"`
+	NumberOfRequests int    `yaml:"requests"`
+	WindowSeconds    int    `yaml:"window"`
+	Action           string `yaml:"action"`
+	Method           string `yaml:"method"`
+}
+
+type RateLimitAppConfig struct {
+	Storage string `yaml:"storage"`
+}
+
+type StorageAppConfig struct {
+	Redis storage.RedisAppConfig `yaml:"redis"`
+}
+
 type AppConfig struct {
 	Services             []Service  `yaml:"services"`
 	Endpoints            []Endpoint `yaml:"endpoints"`
@@ -30,5 +53,8 @@ type AppConfig struct {
 	ManagementAddress    string     `yaml:"management.address"`
 	ReloadConfigInterval int        `yaml:"config.reload_interval"`
 
+	Storage StorageAppConfig `yaml:"storage"`
+
 	MonitoringAppConfig MonitoringAppConfig `yaml:"monitoring"`
+	RateLimitAppConfig  RateLimitAppConfig  `yaml:"rate_limit"`
 }
