@@ -15,7 +15,7 @@ func PerformLimiting(p *proxy.Server, rules []config.RateLimitRule, request *htt
 	clientAddr, _, err := net.SplitHostPort(request.RemoteAddr)
 
 	if err != nil {
-
+		clientAddr = request.RemoteAddr
 	}
 
 	for _, rule := range rules {
