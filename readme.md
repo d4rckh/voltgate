@@ -19,7 +19,25 @@ services:
       - ./voltgate.yaml:/app/config.yaml
 ```
 
-### Configuration Example (config.yaml)
+### Minimal Configuration Example (config.yaml)
+```yaml
+services:
+  - name: service_name
+    url: http://localhost:9090
+
+endpoints:
+  - host: domain.com
+    service: service_name
+```
+
+## Grafana Dashboard
+
+Using the [grafana.json](grafana.json) file you can import the dashboard below in your instance!
+
+![grafana.png](grafana.png)
+
+
+### All Configurations Example (config.yaml)
 ```yaml
 management:
   address: ":9999"
@@ -79,12 +97,6 @@ endpoints:
           requests: 2
             # Optional rate limiting rules, make sure to configure Redis for production
 ```
-
-## Grafana Dashboard
-
-Using the [grafana.json](grafana.json) file you can import the dashboard below in your instance!
-
-![grafana.png](grafana.png)
 
 ## Metrics Overview
 Voltgate Proxy collects and exposes metrics to Prometheus for monitoring.
