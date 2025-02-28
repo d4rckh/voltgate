@@ -10,7 +10,7 @@ import (
 	"voltgate-proxy/proxy"
 )
 
-func sendToLoki(p *proxy.Server, logMsg string) {
+func sendToLoki(p *proxy.Server, logMsg string, logLevel string) {
 	p.Mu.RLock()
 	lokiUrl := p.LokiUrl
 	p.Mu.RUnlock()
@@ -19,7 +19,8 @@ func sendToLoki(p *proxy.Server, logMsg string) {
 		Streams: []LogEntryStream{ // Streams should be a slice
 			{
 				Stream: map[string]string{
-					"job": "voltgate-server",
+					"job":   "voltgate-server",
+					"level": logLevel,
 				},
 				Values: [][]string{
 					{strconv.FormatInt(time.Now().UnixNano(), 10), logMsg}, // Loki expects a timestamp and log message

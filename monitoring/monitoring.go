@@ -35,7 +35,7 @@ func MonitorRequest(p *proxy.Server, request *http.Request, originalUrl *url.URL
 	RequestDuration.WithLabelValues(request.Method, originalUrl.Host, "", request.URL.Path).Observe(float64(duration.Milliseconds()))
 	ResponseSize.WithLabelValues(request.Method, originalUrl.Host, "", request.URL.Path).Observe(float64(size))
 
-	go sendToLoki(p, logMsg)
+	go sendToLoki(p, logMsg, "info")
 }
 
 func MonitorBlockedRequest(p *proxy.Server, request *http.Request, count int, duration time.Duration) {
@@ -46,5 +46,5 @@ func MonitorBlockedRequest(p *proxy.Server, request *http.Request, count int, du
 
 	BlockedRequestCount.WithLabelValues(request.Method, request.Host, "", request.URL.Path).Inc()
 
-	go sendToLoki(p, logMsg)
+	go sendToLoki(p, logMsg, "warn")
 }

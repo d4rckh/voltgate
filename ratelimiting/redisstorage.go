@@ -2,7 +2,6 @@ package ratelimiting
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 	"voltgate-proxy/storage"
@@ -30,7 +29,7 @@ func (r *RedisRateLimiterStorage) GetRequestCount(key string, window time.Durati
 	val, err := r.client.Get(r.ctx, key).Result()
 	if err != nil {
 		val = "0"
-		log.Printf("[GetRequestCount] Error getting value for key %s: %v, creating the key with value 0", key, err)
+		//log.Printf("[GetRequestCount] Error getting value for key %s: %v, creating the key with value 0", key, err)
 		r.client.Set(r.ctx, key, 0, window)
 	}
 
