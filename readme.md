@@ -80,6 +80,12 @@ endpoints:
             # Optional rate limiting rules, make sure to configure Redis for production
 ```
 
+## Grafana Dashboard
+
+Using the [grafana.json](grafana.json) file you can import the dashboard below in your instance!
+
+![grafana.png](grafana.png)
+
 ## Metrics Overview
 Voltgate Proxy collects and exposes metrics to Prometheus for monitoring.
 
