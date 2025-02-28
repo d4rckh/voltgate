@@ -2,7 +2,8 @@
 
 ## Features
 - Reverse proxy supporting multiple services and domains
-- Basic rate limiting based on client address
+- Basic rate limiting with Redis
+- Basic caching with Redis
 - Hot reloading of endpoints and services
 - Log publishing to Loki
 
@@ -68,11 +69,12 @@ endpoints:
       rules:
         - path: "^/myendpoint"
           ttl: 10 # seconds
-            # Optional caching rules, make sure to configure Redis for production 
+          params: ["param1", "params2"] # Optional array of params to construct the cache key, by default it will use all params
+            # Optional caching rules, will cache all GET requests that match the regex path, make sure to configure Redis for production 
     rate_limit:
       rules:
-        - path: "^/api/some_action"
-          method: POST
+        - path: "^/api/some_action" # regex
+          method: POST # must be defined
           window: 10 # seconds
           requests: 2
             # Optional rate limiting rules, make sure to configure Redis for production

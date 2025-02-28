@@ -49,6 +49,10 @@ func parseRateLimitRules(config *AppConfig) AppRateLimitRules {
 	}
 
 	for _, endpoint := range config.Endpoints {
+		if len(endpoint.RateLimitConfig.Rules) == 0 {
+			continue
+		}
+
 		rateLimitRules.EndpointRateLimitRules[endpoint.Host] = make([]RateLimitRule, len(endpoint.RateLimitConfig.Rules))
 		copy(rateLimitRules.EndpointRateLimitRules[endpoint.Host], endpoint.RateLimitConfig.Rules)
 	}
@@ -62,6 +66,10 @@ func parseCacheRules(config *AppConfig) AppCacheRules {
 	}
 
 	for _, endpoint := range config.Endpoints {
+		if len(endpoint.CacheConfig.Rules) == 0 {
+			continue
+		}
+
 		appCacheRules.EndpointCacheRules[endpoint.Host] = make([]CacheRule, len(endpoint.RateLimitConfig.Rules))
 		copy(appCacheRules.EndpointCacheRules[endpoint.Host], endpoint.CacheConfig.Rules)
 	}
